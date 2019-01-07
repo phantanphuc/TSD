@@ -19,7 +19,7 @@ parser.add_argument('--lr', default=1e-3, type=float, help='learning rate')
 parser.add_argument('--momentum', default=0.9, type=float, help='momentum')
 parser.add_argument('--decay', default=1e-4, type=float, help='decay')
 parser.add_argument('--use_cuda', default=False, type=bool, help='Use CUDA for training')
-parser.add_argument('--epoch_count', default=20, type=int, help='Number of training epoch')
+parser.add_argument('--epoch_count', default=1, type=int, help='Number of training epoch')
 parser.add_argument('--batch_size', default=1, type=int, help='Batch size')
 parser.add_argument('--resume_mode', default='pretrain', type=str, help='Continue training mode: \'none\': From nothing,\'pretrain\': From pretrain model, \'continue\': Continue from SSD Model ')
 
@@ -34,7 +34,7 @@ parser.add_argument('--train_dir', default='./dataset/train', type=str, help='tr
 parser.add_argument('--train_meta', default='./metafile/train.txt', type=str, help='training set metafile location')
 
 parser.add_argument('--validate_dir', default='./dataset/train', type=str, help='validation set directory')
-parser.add_argument('--validate_meta', default='./metafile/train.txt', type=str, help='validateion set metafile location')
+parser.add_argument('--validate_meta', default='./metafile/test.txt', type=str, help='validateion set metafile location')
 
 parser.add_argument('--output_directory', default='./checkpoint', type=str, help='Output model directory')
 parser.add_argument('--output_format', default='ckpt_%d.pth', type=str, help='Format of output model\'s name, this file must contain symbol %%d for indexing purpose [For example: ckpt_%%d.pth]')
