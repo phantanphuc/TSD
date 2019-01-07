@@ -75,6 +75,8 @@ def train(epoch):
 			loc_targets = loc_targets.cuda()
 			conf_targets = conf_targets.cuda()
 
+		# print(images)
+
 		images = Variable(images)
 		loc_targets = Variable(loc_targets)
 		conf_targets = Variable(conf_targets)
@@ -82,21 +84,19 @@ def train(epoch):
 		optimizer.zero_grad()
 
 
+
 		loc_preds, conf_preds = net(images)
 
-		#print('------------------')
-		#print(loc_preds.data.numpy().shape)
-		#print(conf_preds.data.numpy().shape)
-		#print(loc_targets.data.numpy().shape)
-		#print(conf_targets.data.numpy().shape)
 
 		loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)
 
-		loss.backward()
-		optimizer.step()
+		# loss.backward()
+		# optimizer.step()
 
-		train_loss += loss.data[0]
-		print('[E %d I %d]: %.3f %.3f' % (epoch, batch_idx, loss.data[0], train_loss/(batch_idx+1)))
+		# train_loss += loss.data[0]
+		# print('[E %d I %d]: %.3f %.3f' % (epoch, batch_idx, loss.data[0], train_loss/(batch_idx+1)))
+
+		break
 
 def test(epoch):
 	print('\nTest')
