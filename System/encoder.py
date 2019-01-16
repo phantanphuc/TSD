@@ -197,6 +197,9 @@ class DataEncoder:
 
 		keep = []
 		while order.numel() > 0:
+			if order.dim() == 0:
+				order = order.unsqueeze(0)
+
 			i = order[0]
 			keep.append(i)
 
@@ -237,7 +240,6 @@ class DataEncoder:
 		  labels: (tensor) class labels, sized [#obj,1].
 		'''
 
-		
 		if abs(args.bacground_conf_multiplier - 1.0) > 0.001:
 			for i in conf:
 				i[0] = i[0] / args.bacground_conf_multiplier
@@ -249,6 +251,10 @@ class DataEncoder:
 		boxes = torch.cat([cxcy-wh/2, cxcy+wh/2], 1)  # [8732,4]
 
 		max_conf, labels = conf.max(1)  # [8732,1]
+
+		max_conf = max_conf.view(24024, 1)
+		labels = labels.view(24024, 1)
+
 		ids = labels.squeeze(1).nonzero().squeeze(1)  # [#boxes,]
 
 		keep = self.nms(boxes[ids], max_conf[ids].squeeze(1))
