@@ -42,6 +42,7 @@ testloader = torch.utils.data.DataLoader(testset, batch_size=args.batch_size, sh
 net = SSD300()
 
 if args.use_cuda:
+	torch.cuda.set_device(7)
 	net.cuda()
 	cudnn.benchmark = True
 
@@ -61,61 +62,80 @@ optimizer = optim.SGD(net.parameters(), lr=args.lr, momentum=args.momentum, weig
 
 # Training
 def train(epoch):
+
+	#if args.use_cuda:
+	#	torch.cuda.set_device(2)
+
 	print('\nEpoch: %d' % epoch)
 	net.train()
 	train_loss = 0
-	for batch_idx, (images, loc_targets, conf_targets) in enumerate(trainloader):
+	for batch_idx, (images, loc_targets, conf_targets, fname) in enumerate(trainloader):
+		#try:
+			if (numpy.max(conf_targets.numpy()) == 0):
+				continue
 
-		if (numpy.max(conf_targets.numpy()) == 0):
-			continue
+			print(fname)
 
+			if args.use_cuda:
+				images = images.cuda()
+				loc_targets = loc_targets.cuda()
+				conf_targets = conf_targets.cuda()
 
-		if args.use_cuda:
-			images = images.cuda()
-			loc_targets = loc_targets.cuda()
-			conf_targets = conf_targets.cuda()
+			# print(images)
 
-		# print(images)
+			images = Variable(images)
+			loc_targets = Variable(loc_targets)
+			conf_targets = Variable(conf_targets)
 
-		images = Variable(images)
-		loc_targets = Variable(loc_targets)
-		conf_targets = Variable(conf_targets)
-
-		optimizer.zero_grad()
-
-
-
-		loc_preds, conf_preds = net(images)
+			optimizer.zero_grad()
 
 
-		loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)
 
-		# loss.backward()
-		# optimizer.step()
+			loc_preds, conf_preds = net(images)
 
-		# train_loss += loss.data[0]
-		# print('[E %d I %d]: %.3f %.3f' % (epoch, batch_idx, loss.data[0], train_loss/(batch_idx+1)))
 
-		break
+			loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)
 
+			loss.backward()
+			optimizer.step()
+
+			train_loss += loss.data
+			print('[E %d I %d]: %.3f %.3f' % (epoch, batch_idx, loss.data, train_loss/(batch_idx+1)))
+
+			with open('res.txt', 'a') as foutdata:
+				foutdata.write('[E %d I %d]: %.3f %.3f' % (epoch, batch_idx, loss.data, train_loss/(batch_idx+1)) + '\n')
+
+		#except:
+		#	pass
+
+		#break
+
+@torch.no_grad()
 def test(epoch):
+
+	#if args.use_cuda:
+	#	torch.cuda.set_device(3)
 	print('\nTest')
 	net.eval()
 	test_loss = 0
-	for batch_idx, (images, loc_targets, conf_targets) in enumerate(testloader):
-		if args.use_cuda:
-			images = images.cuda()
-			loc_targets = loc_targets.cuda()
-			conf_targets = conf_targets.cuda()
+	for batch_idx, (images, loc_targets, conf_targets, fname) in enumerate(testloader):
+		#try:
+			if args.use_cuda:
+				images = images.cuda()
+				loc_targets = loc_targets.cuda()
+				conf_targets = conf_targets.cuda()
 
-		images = Variable(images, volatile=True)
-		loc_targets = Variable(loc_targets)
-		conf_targets = Variable(conf_targets)
+			images = Variable(images, volatile=True)
+			loc_targets = Variable(loc_targets)
+			conf_targets = Variable(conf_targets)
 
-		loc_preds, conf_preds = net(images)
-		loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)
-		test_loss += loss.data[0]
-		print('[ETe %d I %d]: %.3f %.3f' % (epoch, batch_idx, loss.data[0], test_loss/(batch_idx+1)))
+			loc_preds, conf_preds = net(images)
+			loss = criterion(loc_preds, loc_targets, conf_preds, conf_targets)
+			test_loss += loss.data
+			print('[ETe %d I %d]: %.3f %.3f' % (epoch, batch_idx, loss.data, test_loss/(batch_idx+1)))
+
+		#except:
+		#	pass
 
 	# Save checkpoint.
 	global best_loss
@@ -141,8 +161,9 @@ def test(epoch):
 
 for epoch in range(start_epoch, start_epoch + args.epoch_count):
 	train(epoch)
-	# test(epoch)
+	test(epoch)
 	#quit()
+	pass
 
 #-------- UPLOADING --------------------
 

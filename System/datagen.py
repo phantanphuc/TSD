@@ -103,7 +103,7 @@ class ListDataset(data.Dataset):
 		loc_target, conf_target = self.data_encoder.encode(boxes, labels)
 
 
-		return img, loc_target, conf_target
+		return img, loc_target, conf_target, fname
 
 
 	def random_crop(self, img, boxes, labels):

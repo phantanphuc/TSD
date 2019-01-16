@@ -62,8 +62,9 @@ class MultiBoxLoss(nn.Module):
 		'''
 		batch_size, num_boxes = pos.size()
 
-		conf_loss[pos] = 0  # set pos boxes = 0, the rest are neg conf_loss
+		# conf_loss[pos] = 0  # set pos boxes = 0, the rest are neg conf_loss
 		conf_loss = conf_loss.view(batch_size, -1)  # [N,8732]
+		conf_loss[pos] = 0
 
 		_,idx = conf_loss.sort(1, descending=True)  # sort by neg conf_loss
 		_,rank = idx.sort(1)  # [N,8732]
@@ -125,5 +126,5 @@ class MultiBoxLoss(nn.Module):
 
 		loc_loss /= num_matched_boxes
 		conf_loss /= num_matched_boxes
-		print('%f %f' % (loc_loss.data[0], conf_loss.data[0]), end=' ')
+		print('%f %f' % (loc_loss.data, conf_loss.data), end=' ')
 		return loc_loss + conf_loss
